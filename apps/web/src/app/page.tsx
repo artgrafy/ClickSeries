@@ -1,7 +1,21 @@
 import Link from "next/link";
-import { Book, Brain, UtensilsCrossed } from "lucide-react";
+import { Book, Brain, UtensilsCrossed, Database, CheckCircle2, XCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
-export default function Home() {
+async function getDbStatus() {
+  try {
+    const { error } = await supabase.from("_connection_test").select("*").limit(1);
+    // 42P01: undefined_table (연결은 되었으나 테이블만 없는 상태도 성공으로 간주)
+    if (error && error.code !== '42P01') return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export default async function Home() {
+  const isDbConnected = await getDbStatus();
+
   const apps = [
     {
       name: "Click Bible",
@@ -29,7 +43,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-base-200">
       <main className="container mx-auto px-4 py-12 max-w-4xl">
-        <header className="text-center mb-16">
+        <header className="text-center mb-16 relative">
+          {/* DB 상태 표시배지 */}
+          <div className="absolute top-0 right-0">
+            <div className={`badge badge-outline gap-2 py-3 px-4 ${isDbConnected ? 'badge-success text-success' : 'badge-error text-error'}`}>
+              <Database size={14} />
+              <span className="text-[10px] font-bold tracking-tighter uppercase">
+                Supabase: {isDbConnected ? 'Connected' : 'Disconnected'}
+              </span>
+              {isDbConnected ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+            </div>
+          </div>
+
           <h1 className="text-5xl font-bold text-base-content mb-4 tracking-tight">
             Click <span className="text-primary italic">Series</span>
           </h1>
