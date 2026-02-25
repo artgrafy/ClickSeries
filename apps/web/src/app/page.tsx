@@ -7,8 +7,8 @@ async function getDbStatus() {
   try {
     const { error } = await supabase.from("_connection_test").select("*").limit(1);
     if (error) {
-      // 42P01: undefined_table is acceptable as it means connection worked but table doesn't exist
-      if (error.code === '42P01') return { status: "connected" };
+      // 42P01 or PGRST205: means the connection worked but the table doesn't exist
+      if (error.code === '42P01' || error.code === 'PGRST205') return { status: "connected" };
       return {
         status: "api_error",
         code: error.code,
@@ -25,8 +25,6 @@ export default async function Home() {
   const result = await getDbStatus();
   const isDbConnected = result.status === "connected";
   const isConfigMissing = result.status === "missing_config";
-  const errorMessage = result.message || "";
-  const errorCode = result.code || "";
 
   const apps = [
     {
@@ -57,7 +55,7 @@ export default async function Home() {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <header className="text-center mb-16 relative">
           {/* DB 상태 표시배지 */}
-          <div className="absolute top-0 right-0 flex flex-col items-end gap-2">
+          <div className="absolute top-0 right-0">
             <div className={`badge badge-outline gap-2 py-3 px-4 ${isDbConnected ? 'badge-success text-success' : isConfigMissing ? 'badge-warning text-warning' : 'badge-error text-error'}`}>
               <Database size={14} />
               <span className="text-[10px] font-bold tracking-tighter uppercase">
@@ -65,12 +63,6 @@ export default async function Home() {
               </span>
               {isDbConnected ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
             </div>
-            {!isDbConnected && !isConfigMissing && (errorMessage || errorCode) && (
-              <div className="bg-error/10 text-error text-[9px] p-2 rounded-lg border border-error/20 max-w-[200px] text-right font-mono">
-                {errorCode && <div className="font-bold underline mb-1">Error: {errorCode}</div>}
-                <div className="break-words">{errorMessage}</div>
-              </div>
-            )}
           </div>
 
           <h1 className="text-5xl font-bold text-base-content mb-4 tracking-tight">
