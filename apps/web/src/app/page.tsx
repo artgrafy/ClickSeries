@@ -1,20 +1,22 @@
 import Link from "next/link";
 import { Book, Brain, UtensilsCrossed, Database, CheckCircle2, XCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 async function getDbStatus() {
+  if (!isSupabaseConfigured) return "missing_config";
   try {
     const { error } = await supabase.from("_connection_test").select("*").limit(1);
-    // 42P01: undefined_table (연결은 되었으나 테이블만 없는 상태도 성공으로 간주)
-    if (error && error.code !== '42P01') return false;
-    return true;
+    if (error && error.code !== '42P01') return "api_error";
+    return "connected";
   } catch {
-    return false;
+    return "exception";
   }
 }
 
 export default async function Home() {
-  const isDbConnected = await getDbStatus();
+  const dbStatus = await getDbStatus();
+  const isDbConnected = dbStatus === "connected";
+  const isConfigMissing = dbStatus === "missing_config";
 
   const apps = [
     {
@@ -46,10 +48,10 @@ export default async function Home() {
         <header className="text-center mb-16 relative">
           {/* DB 상태 표시배지 */}
           <div className="absolute top-0 right-0">
-            <div className={`badge badge-outline gap-2 py-3 px-4 ${isDbConnected ? 'badge-success text-success' : 'badge-error text-error'}`}>
+            <div className={`badge badge-outline gap-2 py-3 px-4 ${isDbConnected ? 'badge-success text-success' : isConfigMissing ? 'badge-warning text-warning' : 'badge-error text-error'}`}>
               <Database size={14} />
               <span className="text-[10px] font-bold tracking-tighter uppercase">
-                Supabase: {isDbConnected ? 'Connected' : 'Disconnected'}
+                Supabase: {isDbConnected ? 'Connected' : isConfigMissing ? 'Config Missing' : 'Connection Error'}
               </span>
               {isDbConnected ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
             </div>
