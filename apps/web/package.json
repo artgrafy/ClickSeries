@@ -1,5 +1,5 @@
 {
-  "name": "click-mbti-temp",
+  "name": "click-series-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.3",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
-    "daisyui": "^5.5.18",
+    "daisyui": "^5.5.19",
     "downloadjs": "^1.4.7",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.34.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
-    "lucide-react": "^0.564.0",
+    "lucide-react": "^0.575.0",
     "next": "16.1.6",
+    "openai": "^6.17.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.4.1"
